@@ -1,11 +1,16 @@
 #include "global.h"
 std::map<SteamAPICall_t, std::pair<void*, size_t>> reader;
-S_API bool S_CALLTYPE SteamAPI_ISteamRemoteStorage_FileDelete(intptr_t instancePtr,const char* pchFile){
-	zip_int64_t id=zip_name_locate(zip, pchFile, ZIP_FL_NOCASE);
+S_API bool S_CALLTYPE SteamAPI_ISteamRemoteStorage_FileDelete(intptr_t instancePtr, const char* pchFile) {
+	zip_int64_t id = zip_name_locate(zip, pchFile, ZIP_FL_NOCASE);
 	if (id == -1)return false;
 	zip_delete(zip, id);
 	zip_close(zip);
-	zip = zip_open("E:\\data.zip", ZIP_CREATE, NULL);
+	char path[MAX_PATH+16];
+	DWORD len = GetModuleFileNameA(0, path, MAX_PATH);
+	if (GetLastError() != ERROR_SUCCESS)return false;
+	while (len > 0 && path[len] != '\\')len--;
+	strcpy(&path[len], "\\SaveData.bin");
+	zip = zip_open(path, ZIP_CREATE, NULL);
 	return true;
 }
 S_API bool S_CALLTYPE SteamAPI_ISteamRemoteStorage_FileExists(intptr_t instancePtr,const char* pchFile){
